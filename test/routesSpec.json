@@ -1,0 +1,203 @@
+{
+    "server": "",
+    "title": "",
+    "prefix": "",
+    "endpoints": [
+        {
+            "name": "Assets",
+            "description": "Assets are files and Metadata stored In Adbank This API allows you to retrieve assets or send Assets into your Adbank",
+            "uri": "/assets/",
+            "methods": [
+                {
+                    "name": "Create an asset",
+                    "synopsis": "Create a new AdBank asset.",
+                    "hidden": true,
+                    "parameters": [
+                        {
+                            "name": "name",
+                            "required": true,
+                            "location": "body",
+                            "type": "string",
+                            "description": "The name of the new asset to appear in the meta data of the asset."
+                        },
+                        {
+                            "name": "path",
+                            "location": "body",
+                            "type": "string",
+                            "description": "The path of the new asset."
+                        }
+                    ],
+                    "method": "POST",
+                    "url": "/assets"
+                },
+                {
+                    "name": "Assets List",
+                    "synopsis": "List all assets, or search by fields specified using the query param.",
+                    "method": "GET",
+                    "url": "/assets"
+                },
+                {
+                    "name": "Get an Asset",
+                    "synopsis": "Get an Asset by it`s id.",
+                    "url": "/assets/:id",
+                    "parameters": [
+                        {
+                            "name": "id",
+                            "required": true,
+                            "type": "string",
+                            "location": "query",
+                            "description": "The ID of the asset you wish to fetch. This request will return additional information if you select the options below."
+                        },
+                        {
+                            "name": "rights",
+                            "label": "Rights",
+                            "input": "checkbox",
+                            "location": "query",
+                            "type": "boolean",
+                            "description": "Include usage rights in the response"
+                        },
+                        {
+                            "name": "images",
+                            "label": "Images",
+                            "input": "checkbox",
+                            "location": "query",
+                            "type": "boolean",
+                            "description": "Include links to images in the response"
+                        },
+                        {
+                            "name": "revisions",
+                            "label": "Revisions",
+                            "input": "checkbox",
+                            "location": "query",
+                            "type": "boolean",
+                            "description": "Include revisions in the response"
+                        }
+                    ],
+                    "method": "GET"
+                },
+                {
+                    "name": "Update an Asset",
+                    "synopsis": "Because the system has dynamic configuration, in order to understand the payload for this method issue an /asset/:id request to  see the data strcture. The meta property of the response forms the body of the payload.",
+                    "url": "/assets/:id",
+                    "parameters": [
+                        {
+                            "name": "id",
+                            "required": true,
+                            "location": "query",
+                            "type": "string",
+                            "description": "The ID of the asset you wish to update."
+                        },
+                        {
+                            "name": "body",
+                            "required": true,
+                            "location": "body",
+                            "type": "json",
+                            "input": "textarea",
+                            "description": "The new data for the asset you are updating."
+                        }
+                    ],
+                    "method": "PUT"
+                }
+            ]
+        },
+        {
+            "methods": [
+                {
+                    "name": "Get media",
+                    "synopsis": "Provides a 302 redirect to the media which should be valid for 15  seconds.",
+                    "url": "/media?assetId=:assetId&fileId=:fileId&accessToken=:accessToken",
+                    "parameters": [
+                        {
+                            "name": "assetId",
+                            "required": true,
+                            "location": "query",
+                            "type": "string",
+                            "description": "The ID of the asset you wish to fetch."
+                        },
+                        {
+                            "name": "fileId",
+                            "required": true,
+                            "location": "query",
+                            "type": "string",
+                            "description": "The ID of the file you wish to fetch, availble from the asset request."
+                        },
+                        {
+                            "name": "accessToken",
+                            "hidden": true,
+                            "location": "query",
+                            "type": "string",
+                            "description": "The access token - available in the assets request."
+                        }
+                    ],
+                    "method": "GET"
+                }
+            ]
+        },
+        {
+            "methods": [
+                {
+                    "name": "Auth.",
+                    "synopsis": "Used to test authorization, returns ok if authorized.",
+                    "url": "/auth",
+                    "hidden": true,
+                    "parameters": [],
+                    "method": "GET"
+                }
+            ]
+        },
+        {
+            "name": "Collections",
+            "description": "Collections are saved searches of your assets based on Metadata tags within the Library area of Adbank. This API allows you to Retrieve the Collections List and Retrieve Assets within the Collections List.",
+            "methods": [
+                {
+                    "name": "Collections List",
+                    "synopsis": "List all collections you can access. Results can be searched using the query parameter.",
+                    "method": "GET",
+                    "url": "/collections"
+                },
+                {
+                    "name": "Get the Assets for a Collection",
+                    "synopsis": "Gets all the assets in a collection.",
+                    "url": "/collections/:collectionId",
+                    "parameters": [
+                        {
+                            "name": "collectionId",
+                            "required": true,
+                            "location": "query",
+                            "type": "string",
+                            "description": "The ID of the collection you wish to fetch."
+                        },
+                        {
+                            "name": "query",
+                            "location": "query",
+                            "type": "string",
+                            "description": "Lucene query to query the assets in the collection."
+                        },
+                        {
+                            "name": "assetDetail",
+                            "input": "checkbox",
+                            "location": "query",
+                            "type": "boolean",
+                            "description": "Return the full asset details."
+                        },
+                        {
+                            "name": "page",
+                            "default": 1,
+                            "location": "query",
+                            "type": "number",
+                            "description": "The page number, In the repsonse if there are more pages of data available the more property will be true."
+                        },
+                        {
+                            "name": "size",
+                            "location": "query",
+                            "default": 10,
+                            "type": "number",
+                            "description": "The number of results to be returned in a page."
+                        }
+                    ],
+                    "method": "GET"
+                }
+            ]
+        }
+    ]
+}
