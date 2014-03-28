@@ -1,5 +1,5 @@
 {
-  "name": "livedocs-routeLoader",
+  "name": "livedocs-route-loader",
   "version": "0.0.0",
   "description": "Route Loader for livedocs",
   "main": "loader.js",
