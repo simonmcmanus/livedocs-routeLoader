@@ -145,7 +145,7 @@ module.exports = function(routesFolder, callback) {
       prefix: '',
       endpoints: combined
     };
-    return scope.spec;
+    return callback && callback(null, scope.spec);
   }
 
   /**
