@@ -9,7 +9,7 @@ var path = require('path');
  * @param  {Function} callback     When all folders have been passed.
  * @return {Object}                The scope object
  */
-module.exports = function(routesFolder, callback) {
+module.exports = function(routesFolder, logger, callback) {
   var scope = {
     spec: false // will be false untill finished loading.
   };
@@ -18,7 +18,7 @@ module.exports = function(routesFolder, callback) {
                         // when the spec has finished loading.
   var keyedMeta = {}; // o
   function init() {
-    scope.parseFolder(path.join(__dirname, routesFolder))
+    scope.parseFolder(path.join(process.cwd(), routesFolder))
   }
 
   scope.verbMapping = {
@@ -109,6 +109,7 @@ module.exports = function(routesFolder, callback) {
   scope.parseFolder = function(dir, relativeRoute) {
     folderCount = folderCount + 1;
     relativeRoute = relativeRoute || '';
+    console.log('read', dir);
     var files = fs.readdirSync(dir);
     for(var i = 0; files.length > i; i++) {
       var file = path.basename(files[i], '.js'); // get without ext
@@ -145,7 +146,7 @@ module.exports = function(routesFolder, callback) {
       prefix: '',
       endpoints: combined
     };
-    return callback && callback(null, scope.spec);
+    return callback && callback(null, scope);
   }
 
   /**
@@ -170,7 +171,8 @@ module.exports = function(routesFolder, callback) {
           req.spec = method;
           next();
         });
-        server[verbMapping[method.method]](route, middleware, method.action);
+        server[method.method.toLowerCase()](route, middleware, method.action);
+        logger && logger(method.method, route, '  ✓');
       }
     }
   };
