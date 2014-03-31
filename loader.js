@@ -143,7 +143,7 @@ module.exports = function(routesFolder, logger, callback) {
     scope.spec = {
       server: '',
       title: '',
-      prefix: '',
+      prefix: '/api/v1',
       endpoints: combined
     };
     return callback && callback(null, scope);
@@ -167,10 +167,10 @@ module.exports = function(routesFolder, logger, callback) {
         var route = scope.spec.prefix + method.url;
         var middleware = method.middleware || [];
         // make spec available on the request. Used for validation.
-        middleware.unshift(function(req, res, next) {
+        middleware.unshift(function(method, req, res, next) {
           req.spec = method;
           next();
-        });
+        }.bind(null, method));
         server[method.method.toLowerCase()](route, middleware, method.action);
         logger && logger(method.method, route, '  ✓');
       }
