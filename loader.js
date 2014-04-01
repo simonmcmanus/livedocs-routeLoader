@@ -53,7 +53,7 @@ module.exports = function(routesFolder, logger, callback) {
    */
   scope.handleMeta = function(meta, relativeRoute) {
     var endpoint = scope.getEndpoint(relativeRoute);
-    if(!keyedMeta[endpoint]) { // should only take the highest level index
+    if(!keyedMeta[endpoint] && relativeRoute.split('/').length === 2) { // should only take the highest level index
       keyedMeta[endpoint] = meta;
     }
   };
