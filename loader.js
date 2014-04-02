@@ -98,6 +98,8 @@ module.exports = function(routesFolder, logger, callback) {
     } else if (scope.verbMapping[file]) {
       data.method = scope.verbMapping[file].toUpperCase();
       scope.handleMethod(data, relativeRoute);
+    } else if (data.method) { // no verb mapping but method specified
+      scope.handleMethod(data, relativeRoute);
     }
   };
 
@@ -109,7 +111,6 @@ module.exports = function(routesFolder, logger, callback) {
   scope.parseFolder = function(dir, relativeRoute) {
     folderCount = folderCount + 1;
     relativeRoute = relativeRoute || '';
-    console.log('read', dir);
     var files = fs.readdirSync(dir);
     for(var i = 0; files.length > i; i++) {
       var file = path.basename(files[i], '.js'); // get without ext
