@@ -2,6 +2,7 @@
 
 var fs = require('fs');
 var path = require('path');
+var validator = require('livedocs-middleware');
 
 /**
  * Given a folder load those files into a livedocs spec.
@@ -18,7 +19,7 @@ module.exports = function(routesFolder, logger, callback) {
                         // when the spec has finished loading.
   var keyedMeta = {}; // o
   function init() {
-    scope.parseFolder(path.join(process.cwd(), routesFolder))
+    scope.parseFolder(path.join(process.cwd(), routesFolder));
   }
 
   scope.verbMapping = {
@@ -49,11 +50,13 @@ module.exports = function(routesFolder, logger, callback) {
    * Called when an index.js file is found in a routes folder.
    * Add the data to the
    * @param  {Object} meta          contents of the index.js export object.
-   * @param  {String} relativeRoute Route relative to where parseFolder was first called.
+   * @param  {String} relativeRoute Route relative to where parseFolder was
+   *                                 first called.
    */
   scope.handleMeta = function(meta, relativeRoute) {
     var endpoint = scope.getEndpoint(relativeRoute);
-    if(!keyedMeta[endpoint] && relativeRoute.split('/').length === 2) { // should only take the highest level index
+    // should only take the highest level index
+    if (!keyedMeta[endpoint] && relativeRoute.split('/').length === 2) {
       keyedMeta[endpoint] = meta;
     }
   };
@@ -73,7 +76,7 @@ module.exports = function(routesFolder, logger, callback) {
     } else {
       return relativeRoute;
     }
-  }
+  };
 
   scope.handleMethod = function(method, relativeRoute) {
     method.url = scope.getUrl(method, relativeRoute);
@@ -81,7 +84,7 @@ module.exports = function(routesFolder, logger, callback) {
       keyedEndpoints[scope.getEndpoint(method.url)] = [];
     }
     keyedEndpoints[scope.getEndpoint(method.url)].push(method);
-  }
+  };
 
 
   /**
@@ -115,7 +118,8 @@ module.exports = function(routesFolder, logger, callback) {
     for(var i = 0; files.length > i; i++) {
       var file = path.basename(files[i], '.js'); // get without ext
       if (fs.statSync(dir + '/' + files[i]).isDirectory()) {
-        scope.parseFolder(path.join(dir, files[i]), relativeRoute + '/' + files[i]);
+        var fullPath = relativeRoute + '/' + files[i];
+        scope.parseFolder(path.join(dir, files[i]), fullPath);
       } else {
         scope.handleFile(file, dir, relativeRoute);
       }
@@ -125,7 +129,7 @@ module.exports = function(routesFolder, logger, callback) {
     if(folderCount === 0) {
       scope.makeSpec(keyedEndpoints, keyedMeta);
     }
-  }
+  };
 
   /**
    * Turns the internal spec into the public spec for use with livedocs
@@ -139,7 +143,7 @@ module.exports = function(routesFolder, logger, callback) {
         meta[end] = {};
       }
       meta[end].methods = endpoints[end];
-      combined.push(meta[end])
+      combined.push(meta[end]);
     }
     scope.spec = {
       server: '',
@@ -148,17 +152,29 @@ module.exports = function(routesFolder, logger, callback) {
       endpoints: combined
     };
     return callback && callback(null, scope);
-  }
+  };
 
   /**
    * Used to load your routes into Restify or Express
-   * @param  {Object} server  Restify server/app object, should work with express
+   * @param  {Object} server  Restify server/app object, should work with
+   *                           express
    */
   scope.load = function(server) {
     if(!scope.spec)  {
       return console.log('Spec is not available, The factory method provides' +
         ' a callback');
     }
+
+    var logRoute = function(req, res, next) {
+      logger('Route is: ', req.spec.name, req.spec.url);
+      next();
+    };
+
+    var setSpec = function(method, req, res, next) {
+      req.spec = method;
+      next();
+    };
+
     var ends = scope.spec.endpoints;
     for(var a = 0; a < ends.length; a++ ) {
       var endpoint = ends[a];
@@ -167,11 +183,8 @@ module.exports = function(routesFolder, logger, callback) {
         var method = endpoint.methods[b];
         var route = scope.spec.prefix + method.url;
         var middleware = method.middleware || [];
-        // make spec available on the request. Used for validation.
-        middleware.unshift(function(method, req, res, next) {
-          req.spec = method;
-          next();
-        }.bind(null, method));
+        // make spec available on the request and do validation.
+        middleware.unshift(setSpec.bind(null, method), logRoute, validator);
         server[method.method.toLowerCase()](route, middleware, method.action);
         logger && logger(method.method, route, '  ✓');
       }
