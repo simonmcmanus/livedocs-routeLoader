@@ -1,3 +1,4 @@
+'use strict';
 
 var should = require('should');
 var deepValidate = require('deepValidate');
@@ -9,21 +10,31 @@ var deepValidate = require('deepValidate');
 describe('Given an initialised routeLoader pointing at the local routes directory', function() {
 
   before(function(done) {
-    require('../loader')('./test/routes', function(error, data) {
+
+    var verbMapping = {
+      create: 'post',
+      file: 'get',
+      read: 'get',
+      update: 'put',
+      del: 'del',
+      edit: 'get', // get the form to edit.
+      list: 'get',
+      search: 'get', // get the search form.
+      download: 'get' // get info to allow a file download.
+    };
+
+    require('../loader')('./test/routes', verbMapping, null, function(error, data) {
       generatedSpec = data;
       done();
     });
   });
 
-
-
   it('It should load the spec provided', function() {
     var routesSpec = require('./routesSpec.json');
+    //console.log(JSON.stringify(generatedSpec.spec, null, 4));
     //test that big black box
-    JSON.stringify(generatedSpec).should.equal(JSON.stringify(routesSpec))
-
+    JSON.stringify(generatedSpec.spec).should.equal(JSON.stringify(routesSpec))
   })
-
 
   describe('getEndpoints', function() {
     describe('Given a route of undefined', function() {
@@ -76,7 +87,4 @@ describe('Given an initialised routeLoader pointing at the local routes director
       });
     })
   });
-
 });
-
-

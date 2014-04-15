@@ -7,10 +7,11 @@ var validator = require('livedocs-middleware');
 /**
  * Given a folder load those files into a livedocs spec.
  * @param  {String}   routesFolder Path to the folder to parse.
+ * @param  {Object}   Verb Mapping associate filename with http methods.
  * @param  {Function} callback     When all folders have been passed.
  * @return {Object}                The scope object
  */
-module.exports = function(routesFolder, logger, callback) {
+module.exports = function(routesFolder, verbMapping, logger, callback) {
   var scope = {
     spec: false // will be false untill finished loading.
   };
@@ -22,17 +23,11 @@ module.exports = function(routesFolder, logger, callback) {
     scope.parseFolder(path.join(process.cwd(), routesFolder));
   }
 
-  scope.verbMapping = {
-    create: 'post',
-    file: 'get',
-    read: 'get',
-    update: 'put',
-    del: 'del',
-    edit: 'get', // get the form to edit.
-    list: 'get',
-    search: 'get', // get the search form.
-    download: 'get' // get info to allow a file download.
-  };
+
+
+  // in situations where certain filename will always map to a particular
+  // http method
+  scope.verbMapping = verbMapping || {};
 
   /**
    * Given /endpoint/a/b/c returns just the endpoint
@@ -95,6 +90,7 @@ module.exports = function(routesFolder, logger, callback) {
    */
   scope.handleFile = function(file, dir, relativeRoute) {
     var fullPath = path.join(dir, file);
+    if(file.slice(0, 1) === '.') return;
     var data = require(fullPath);
     if (file === 'index') {
       scope.handleMeta(data, relativeRoute);

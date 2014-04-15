@@ -4,7 +4,7 @@
   "description": "Route Loader for livedocs",
   "main": "loader.js",
   "directories": {
-    "test": "test"
+    "test": ""
   },
   "scripts": {
     "test": "mocha -C"
