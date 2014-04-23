@@ -13,7 +13,7 @@ var validator = require('livedocs-middleware');
  */
 module.exports = function(routesFolder, verbMapping, logger, callback) {
   var scope = {
-    spec: false // will be false untill finished loading.
+    spec: false // will be false untill finished  loading.
   };
   var keyedEndpoints = {};
   var folderCount = 0;  // not particularly happy about this. needed to track
@@ -177,6 +177,10 @@ module.exports = function(routesFolder, verbMapping, logger, callback) {
 
       for(var b = 0; b < endpoint.methods.length; b++) {
         var method = endpoint.methods[b];
+        var counter =  method.middleware.length;
+        while(counter --) {
+
+        }
         var route = scope.spec.prefix + method.url;
         var middleware = method.middleware || [];
         // make spec available on the request and do validation.
