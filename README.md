@@ -1,9 +1,5 @@
 ##LiveDocs Route Loader
 
-!!!! CONFIRM WHAT HAPPENS WITH NO VERB MAPPING
-
-
-
 LiveDocs specs are one big json file, this module was created so that each piece of documentation can be kept in the same file and the route code it self to try and keep the two in sync.
 
 
@@ -154,7 +150,6 @@ As it does not start with a forward slash it's added to the existing folder stru
 You can also completely ignore the folder structure by starting the url with a forward slash, while this is not recommended it means you can put a file in the assets folder and serve from somewhere completely different.
 
 
-
 ##VerbMapping:
 
 The second parameter that you pass to the route loader is the verb mapping object. In the examples above its empty.
@@ -167,7 +162,6 @@ In some situations you want to have filenames which always map to a certain http
   read: 'get'
 }
 ```
-
 
 When you add a file called create.js into a folder, you do not need to specify the method for that route in the spec as it will automatically be added for you.
 

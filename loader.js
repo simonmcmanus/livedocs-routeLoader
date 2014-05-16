@@ -90,7 +90,11 @@ module.exports = function(routesFolder, verbMapping, logger, callback) {
    */
   scope.handleFile = function(file, dir, relativeRoute) {
     var fullPath = path.join(dir, file);
-    if(file.slice(0, 1) === '.') return;
+
+    if(file.slice(0, 1) === '.') {
+      return;
+    }
+
     var data = require(fullPath);
     if (file === 'index') {
       scope.handleMeta(data, relativeRoute);
@@ -177,16 +181,14 @@ module.exports = function(routesFolder, verbMapping, logger, callback) {
 
       for(var b = 0; b < endpoint.methods.length; b++) {
         var method = endpoint.methods[b];
-        var counter =  method.middleware.length;
-        while(counter --) {
-
-        }
         var route = scope.spec.prefix + method.url;
         var middleware = method.middleware || [];
         // make spec available on the request and do validation.
         middleware.unshift(setSpec.bind(null, method), logRoute, validator);
         server[method.method.toLowerCase()](route, middleware, method.action);
-        logger && logger(method.method, route, '  ✓');
+        if(logger) {
+          logger(method.method, route, '  ✓');
+        }
       }
     }
   };
