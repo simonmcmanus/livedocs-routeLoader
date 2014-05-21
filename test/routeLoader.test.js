@@ -33,7 +33,11 @@ describe('Given an initialised routeLoader pointing at the local routes director
     var routesSpec = require('./routesSpec.json');
     //console.log(JSON.stringify(generatedSpec.spec, null, 4));
     //test that big black box
-    JSON.stringify(generatedSpec.spec).should.equal(JSON.stringify(routesSpec))
+    deepValidate('', routesSpec,  generatedSpec.spec,
+      function(obj, obj1, key, failure) {
+        should(failure).equal(false);
+      }
+    );
   })
 
   describe('getEndpoints', function() {
