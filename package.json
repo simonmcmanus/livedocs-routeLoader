@@ -13,6 +13,7 @@
   "license": "BSD-2-Clause",
   "devDependencies": {
     "sinon": "~1.9.0",
+    "mocha": "*",
     "should": "~3.2.0-beta1",
     "deepvalidate": "0.0.4"
   }
