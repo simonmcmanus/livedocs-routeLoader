@@ -1,5 +1,7 @@
 ##LiveDocs Route Loader
 
+[![Build Status](https://travis-ci.org/simonmcmanus/livedocs-routeLoader.svg)](https://travis-ci.org/simonmcmanus/livedocs-routeLoader)
+
 LiveDocs specs are one big json file, this module was created so that each piece of documentation can be kept in the same file and the route code it self to try and keep the two in sync.
 
 
