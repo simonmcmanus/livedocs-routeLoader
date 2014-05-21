@@ -13,9 +13,9 @@
   "license": "BSD-2-Clause",
   "devDependencies": {
     "deepvalidate": "0.0.4",
+    "livedocs-middleware": "^0.3.1",
     "mocha": "*",
     "should": "~3.2.0-beta1",
     "sinon": "~1.9.0"
   }
-
 }
