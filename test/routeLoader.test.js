@@ -1,7 +1,7 @@
 'use strict';
 
 var should = require('should');
-var deepValidate = require('deepValidate');
+var deepValidate = require('deepvalidate');
 
   var generatedSpec;
   var loader = require('../loader')('./test/routes');
