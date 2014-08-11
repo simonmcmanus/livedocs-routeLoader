@@ -2,6 +2,7 @@
 
 var fs = require('fs');
 var path = require('path');
+var express = require('express');
 var validator = require('livedocs-middleware');
 
 /**
@@ -11,23 +12,53 @@ var validator = require('livedocs-middleware');
  * @param  {Function} callback     When all folders have been passed.
  * @return {Object}                The scope object
  */
-module.exports = function(routesFolder, verbMapping, logger, callback) {
+
+var defaults = {
+  routesFolder : './routes',
+  verbMapping : {
+    create: 'post',
+    file: 'get',
+    read: 'get',
+    update: 'put',
+    del: 'del',
+    edit: 'get', // get the form to edit.
+    list: 'get',
+    search: 'get', // get the search form.
+    download: 'get' // get info to allow a file download.
+  },
+  logger : console.log,
+  prefix : ''
+};
+/**
+ *
+ * new router
+ * @param  {object}   options
+ * @return {[type]}                [description]
+ */
+module.exports = function(options, callback) {
   var scope = {
     spec: false // will be false untill finished  loading.
   };
+  var i;
   var keyedEndpoints = {};
   var folderCount = 0;  // not particularly happy about this. needed to track
-                        // when the spec has finished loading.
+  var router = express.Router();
   var keyedMeta = {}; // o
-  function init() {
-    scope.parseFolder(path.join(process.cwd(), routesFolder));
+  var init = function () {
+    scope.parseFolder(path.join(process.cwd(), options.routesFolder));
+    scope.load(router);
+  };
+
+
+  console.log(defaults);
+  console.log(options);
+  for(i in defaults) {
+    if(defaults.hasOwnProperty(i)) {
+      if (!options.hasOwnProperty(i)) {
+        options[i] = defaults[i];
+      }
+    }
   }
-
-
-
-  // in situations where certain filename will always map to a particular
-  // http method
-  scope.verbMapping = verbMapping || {};
 
   /**
    * Given /endpoint/a/b/c returns just the endpoint
@@ -98,8 +129,8 @@ module.exports = function(routesFolder, verbMapping, logger, callback) {
     var data = require(fullPath);
     if (file === 'index') {
       scope.handleMeta(data, relativeRoute);
-    } else if (scope.verbMapping[file]) {
-      data.method = scope.verbMapping[file].toUpperCase();
+    } else if (options.verbMapping[file]) {
+      data.method = options.verbMapping[file].toUpperCase();
       scope.handleMethod(data, relativeRoute);
     } else if (data.method) { // no verb mapping but method specified
       scope.handleMethod(data, relativeRoute);
@@ -148,7 +179,7 @@ module.exports = function(routesFolder, verbMapping, logger, callback) {
     scope.spec = {
       server: '',
       title: '',
-      prefix: '/api/v1',
+      prefix: options.prefix,
       endpoints: combined
     };
     return callback && callback(null, scope);
@@ -164,9 +195,8 @@ module.exports = function(routesFolder, verbMapping, logger, callback) {
       return console.log('Spec is not available, The factory method provides' +
         ' a callback');
     }
-
     var logRoute = function(req, res, next) {
-      logger('Route is: ', req.spec.name, req.spec.url);
+      options.logger('Route is: ', req.spec.name, req.spec.url);
       next();
     };
 
@@ -174,6 +204,7 @@ module.exports = function(routesFolder, verbMapping, logger, callback) {
       req.spec = method;
       next();
     };
+
 
     var ends = scope.spec.endpoints;
     for(var a = 0; a < ends.length; a++ ) {
@@ -186,14 +217,16 @@ module.exports = function(routesFolder, verbMapping, logger, callback) {
         // make spec available on the request and do validation.
         middleware.unshift(setSpec.bind(null, method), logRoute, validator);
         server[method.method.toLowerCase()](route, middleware, method.action);
-        if(logger) {
-          logger(method.method, route, '  ✓');
+        if(options.logger) {
+          options.logger(method.method, route, '  ✓');
         }
       }
     }
   };
+  // mainly for testing
+  router._scope = scope;
 
   init();
-  return scope;
+  return router;
 
 };
