@@ -7,13 +7,11 @@ describe('Routeloader :', function () {
 
   describe('Given an initialised routeLoader pointing at the local routes directory', function() {
     var router;
-    before(function(done) {
+    before(function() {
       var config = {
         routesFolder : './test/routes'
       };
-      router  = require('../loader')(config, function () {
-        done();
-      });
+      router  = require('../loader')(config);
     });
 
     it('should return a router', function () {
@@ -29,7 +27,7 @@ describe('Routeloader :', function () {
       var routesSpec = require('./routesSpec.json');
       //console.log(JSON.stringify(generatedSpec.spec, null, 4));
       //test that big black box
-      deepValidate('', routesSpec,  router._scope.spec,
+      deepValidate('', routesSpec,  router.spec,
         function(obj, obj1, key, failure) {
           should(failure).equal(false);
         }

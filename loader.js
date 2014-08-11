@@ -2,7 +2,6 @@
 
 var fs = require('fs');
 var path = require('path');
-var express = require('express');
 var validator = require('livedocs-middleware');
 
 /**
@@ -20,8 +19,9 @@ var defaults = {
     file: 'get',
     read: 'get',
     update: 'put',
-    del: 'del',
-    edit: 'get', // get the form to edit.
+    del: 'delete',
+    delete : 'delete',
+    edit: 'put', 
     list: 'get',
     search: 'get', // get the search form.
     download: 'get' // get info to allow a file download.
@@ -32,30 +32,28 @@ var defaults = {
 /**
  *
  * new router
- * @param  {object}   options
+ * @param  {object}   config
  * @return {[type]}                [description]
  */
-module.exports = function(options, callback) {
+module.exports = function(options) {
+  var config = options || {};
+  var spec = false;
   var scope = {
-    spec: false // will be false untill finished  loading.
   };
   var i;
   var keyedEndpoints = {};
   var folderCount = 0;  // not particularly happy about this. needed to track
-  var router = express.Router();
+  var router = config.router || require('express').Router();
   var keyedMeta = {}; // o
   var init = function () {
-    scope.parseFolder(path.join(process.cwd(), options.routesFolder));
+    scope.parseFolder(path.join(process.cwd(), config.routesFolder));
     scope.load(router);
   };
 
-
-  console.log(defaults);
-  console.log(options);
   for(i in defaults) {
     if(defaults.hasOwnProperty(i)) {
-      if (!options.hasOwnProperty(i)) {
-        options[i] = defaults[i];
+      if (!config.hasOwnProperty(i)) {
+        config[i] = defaults[i];
       }
     }
   }
@@ -129,8 +127,8 @@ module.exports = function(options, callback) {
     var data = require(fullPath);
     if (file === 'index') {
       scope.handleMeta(data, relativeRoute);
-    } else if (options.verbMapping[file]) {
-      data.method = options.verbMapping[file].toUpperCase();
+    } else if (config.verbMapping[file]) {
+      data.method = config.verbMapping[file].toUpperCase();
       scope.handleMethod(data, relativeRoute);
     } else if (data.method) { // no verb mapping but method specified
       scope.handleMethod(data, relativeRoute);
@@ -176,13 +174,13 @@ module.exports = function(options, callback) {
       meta[end].methods = endpoints[end];
       combined.push(meta[end]);
     }
-    scope.spec = {
+
+    spec = {
       server: '',
       title: '',
-      prefix: options.prefix,
+      prefix: config.prefix,
       endpoints: combined
     };
-    return callback && callback(null, scope);
   };
 
   /**
@@ -190,13 +188,13 @@ module.exports = function(options, callback) {
    * @param  {Object} server  Restify server/app object, should work with
    *                           express
    */
-  scope.load = function(server) {
-    if(!scope.spec)  {
+  scope.load = function(router) {
+    if(!spec)  {
       return console.log('Spec is not available, The factory method provides' +
         ' a callback');
     }
     var logRoute = function(req, res, next) {
-      options.logger('Route is: ', req.spec.name, req.spec.url);
+      config.logger('Route is: ', req.spec.name, req.spec.url);
       next();
     };
 
@@ -206,27 +204,35 @@ module.exports = function(options, callback) {
     };
 
 
-    var ends = scope.spec.endpoints;
+    var ends = spec.endpoints;
     for(var a = 0; a < ends.length; a++ ) {
       var endpoint = ends[a];
 
       for(var b = 0; b < endpoint.methods.length; b++) {
         var method = endpoint.methods[b];
-        var route = scope.spec.prefix + method.url;
+        var route = spec.prefix + method.url;
         var middleware = method.middleware || [];
         // make spec available on the request and do validation.
         middleware.unshift(setSpec.bind(null, method), logRoute, validator);
-        server[method.method.toLowerCase()](route, middleware, method.action);
-        if(options.logger) {
-          options.logger(method.method, route, '  ✓');
+        router[method.method.toLowerCase()](route, middleware, method.action);
+        if(config.logger) {
+          config.logger(method.method, route, '  ✓');
         }
       }
     }
   };
+
+  init();
+
+  // if using a restify router return a dummy function
+  if(config.router) {
+    router = function (req, res, next) {next();};
+  }
+  // make the spec accesible
+  router.spec = spec;
   // mainly for testing
   router._scope = scope;
 
-  init();
   return router;
 
 };
