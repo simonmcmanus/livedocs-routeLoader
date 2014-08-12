@@ -7,7 +7,7 @@
     "test": ""
   },
   "scripts": {
-    "test": "mocha -C"
+    "test": "mocha -C --reporter spec"
   },
   "author": "Simon McManus",
   "license": "BSD-2-Clause",
@@ -17,5 +17,8 @@
     "mocha": "*",
     "should": "~3.2.0-beta1",
     "sinon": "~1.9.0"
+  },
+  "dependencies": {
+    "express": "~4.8.3"
   }
 }
