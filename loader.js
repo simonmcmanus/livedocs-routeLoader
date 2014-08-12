@@ -21,7 +21,7 @@ var defaults = {
     update: 'put',
     del: 'delete',
     delete : 'delete',
-    edit: 'put', 
+    edit: 'put',
     list: 'get',
     search: 'get', // get the search form.
     download: 'get' // get info to allow a file download.
