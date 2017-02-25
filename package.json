@@ -15,7 +15,7 @@
     "deepvalidate": "0.0.4",
     "livedocs-middleware": "0.3.1",
     "mocha": "*",
-    "should": "~3.2.0-beta1",
-    "sinon": "~1.9.0"
+    "should": "~11.2.0",
+    "sinon": "~1.17.7"
   }
 }
